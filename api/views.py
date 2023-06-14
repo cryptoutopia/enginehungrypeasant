@@ -56,15 +56,18 @@ def update(request):
     try:
         data = json.loads(request.body)
         restaurant = Restaurant.objects.get(key=data['restaurant'])
-
-        DailyMenu.objects.filter(restaurant=restaurant).delete()
-
-        # recreate menus    
+   
         for e in DailyMenu.DAYS:
 
             if e[0] in data:
 
-                entry = DailyMenu(restaurant=restaurant, day=e[0], meal=data[e[0]])
+                entry, created = DailyMenu.objects.update_or_create(
+                    restaurant=restaurant,
+                    day=e[0],
+                    defaults={
+                        "meal": data[e[0]]
+                    }
+                )
                 entry.save()
         
         return HttpResponse("OK")
